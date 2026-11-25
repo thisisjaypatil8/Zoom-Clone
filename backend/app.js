@@ -23,6 +23,14 @@ app.use(express.urlencoded({ extended: true, limit: "40kb" }));
 
 app.use("/api/v1/users", userRoutes);
 
+app.get('/', (req, res) => {
+    return res.send("Welcome to the server!");
+});
+
+io.on("connection", (socket) => {
+    console.log("User connected");
+});
+
 app.get("/home", (req, res) => {
     return res.json({ "Hello": "World" });
 })
@@ -36,7 +44,6 @@ const start = async () => {
     }
     server.listen(app.get("port"), () => {
         console.log(`Server is running on port ${app.get("port")}`);
-        console.log("Hi this is Rida Patil, welcome to the server!");
     });
 }
 
