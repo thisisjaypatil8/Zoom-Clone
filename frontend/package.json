@@ -1,5 +1,6 @@
 {
   "name": "frontend",
+  "author": "Jay Indrapal Patil",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -10,8 +11,16 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.1",
+    "@mui/icons-material": "^9.6.0",
+    "@mui/material": "^9.6.0",
+    "axios": "^1.21.1",
+    "http-status": "^2.1.0",
     "react": "^19.3.1",
-    "react-dom": "^19.3.1"
+    "react-dom": "^19.3.1",
+    "react-router": "^7.18.7",
+    "socket.io-client": "^4.8.4"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
