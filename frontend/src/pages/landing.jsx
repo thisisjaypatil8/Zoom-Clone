@@ -17,9 +17,9 @@ export default function landing(){
             </nav>
             <div className="landingMainContainer">
                 <div className="heroLeft">
-                    <h1><span style={{color: '#ff9839'}}>Connect</span> with your Loved Ones Instantly.</h1>
+                    <h1><span style={{color: '#15D8B3'}}>Connect</span> with your Loved Ones Instantly.</h1>
                     <p>Cover a distance by ClearMeet.</p>
-                    <button onClick={() => window.location.href = "/auth"}>Create a Meeting</button>
+                    <button className="landingPrimaryButton" onClick={() => window.location.href = "/auth"}>Create a Meeting</button>
                 </div>
                 <div className="heroRight">
                     <img src="/mobile.png" alt="" />

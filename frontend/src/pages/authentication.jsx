@@ -1,177 +1,283 @@
-import * as React from 'react';
-import Box from '@mui/material/Box';
-import Button from '@mui/material/Button';
-import MuiCard from '@mui/material/Card';
-import Divider from '@mui/material/Divider';
-import FormLabel from '@mui/material/FormLabel';
-import FormControl from '@mui/material/FormControl';
-import Link from '@mui/material/Link';
-import TextField from '@mui/material/TextField';
-import Typography from '@mui/material/Typography';
-import { styled } from '@mui/material/styles';
-import { GoogleIcon, FacebookIcon, SitemarkIcon } from '../assets/CustomIcons';
+import React from "react";
 
-const Card = styled(MuiCard)(({ theme }) => ({
-  display: 'flex',
-  flexDirection: 'column',
-  alignSelf: 'center',
-  width: '100%',
-  padding: theme.spacing(4),
-  gap: theme.spacing(2),
-  boxShadow:
-    'hsla(220, 30%, 5%, 0.05) 0px 5px 15px 0px, hsla(220, 25%, 10%, 0.05) 0px 15px 35px -5px',
-  [theme.breakpoints.up('sm')]: {
-    width: '450px',
-  },
-  ...theme.applyStyles('dark', {
-    boxShadow:
-      'hsla(220, 30%, 5%, 0.5) 0px 5px 15px 0px, hsla(220, 25%, 10%, 0.08) 0px 15px 35px -5px',
-  }),
-}));
+import Box from "@mui/material/Box";
+import Button from "@mui/material/Button";
+import Divider from "@mui/material/Divider";
+import Link from "@mui/material/Link";
+import TextField from "@mui/material/TextField";
+import Typography from "@mui/material/Typography";
+import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
+import Snackbar from "@mui/material/Snackbar";
+
+import { GoogleIcon, FacebookIcon } from "../assets/CustomIcons";
+import "../assets/styles/authentication.css";
+import Avatar from "@mui/material/Avatar";
+import { AuthContext } from "../context/AuthContext";
 
 export default function Authentication() {
-  const [emailError, setEmailError] = React.useState(false);
-  const [emailErrorMessage, setEmailErrorMessage] = React.useState('');
-  const [passwordError, setPasswordError] = React.useState(false);
-  const [passwordErrorMessage, setPasswordErrorMessage] = React.useState('');
+
+
+
+  // Input states
   const [open, setOpen] = React.useState(false);
+  const [password, setPassword] = React.useState("");
+  const [username, setUsername] = React.useState("");
+  const [fullname, setFullname] = React.useState("");
+  const [formState, setFormState] = React.useState("Sign up");
+  const [message, setMessage] = React.useState();
 
-  const handleClickOpen = () => {
-    setOpen(true);
-  };
+  // Error states
+  const [error, setError] = React.useState(false);
+  const [fullnameError, setFullnameError] = React.useState(false);
+  const [fullnameErrorMessage, setFullnameErrorMessage] = React.useState("");
 
-  const handleClose = () => {
-    setOpen(false);
-  };
+  const [usernameError, setUsernameError] = React.useState(false);
+  const [usernameErrorMessage, setUsernameErrorMessage] = React.useState("");
 
-  const handleSubmit = (event) => {
-    if (emailError || passwordError) {
-      event.preventDefault();
-      return;
-    }
-    const data = new FormData(event.currentTarget);
-    console.log({
-      email: data.get('email'),
-      password: data.get('password'),
-    });
-  };
+  const [passwordError, setPasswordError] = React.useState(false);
+  const [passwordErrorMessage, setPasswordErrorMessage] = React.useState("");
 
+  // Validate form inputs
   const validateInputs = () => {
-    const email = document.getElementById('email');
-    const password = document.getElementById('password');
-
     let isValid = true;
 
-    if (!email.value || !/\S+@\S+\.\S+/.test(email.value)) {
-      setEmailError(true);
-      setEmailErrorMessage('Please enter a valid email address.');
+    if (!fullname && formState == "Sign up") {
+      setFullnameError(true);
+      setFullnameErrorMessage("Please enter a valid name.");
       isValid = false;
     } else {
-      setEmailError(false);
-      setEmailErrorMessage('');
+      setFullnameError(false);
+      setFullnameErrorMessage("");
     }
 
-    if (!password.value || password.value.length < 6) {
+    // Email validation
+    if (!username) {
+      setUsernameError(true);
+      setUsernameErrorMessage("Please enter a valid username.");
+      isValid = false;
+    } else {
+      setUsernameError(false);
+      setUsernameErrorMessage("");
+    }
+
+    // Password validation
+    if (!password || password.length < 6) {
       setPasswordError(true);
-      setPasswordErrorMessage('Password must be at least 6 characters long.');
+      setPasswordErrorMessage(
+        "Password must be at least 6 characters."
+      );
       isValid = false;
     } else {
       setPasswordError(false);
-      setPasswordErrorMessage('');
+      setPasswordErrorMessage("");
     }
 
     return isValid;
   };
 
+  // Handle form submission
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+
+
+
+    if (!validateInputs()) {
+      return;
+    }
+    await handleAuth();
+    // Valid form data
+    console.log({
+      fullname,
+      username,
+      password,
+    });
+  };
+
+  const { handleRegister, handleLogin } = React.useContext(AuthContext);
+
+  let handleAuth = async () => {
+    try {
+      setError("");
+      if (formState === "Sign up") {
+        let result = await handleRegister(fullname, username, password);
+        setMessage(result);
+        setOpen(true);
+        setFormState("Sign in");
+        setUsername("");
+        setPassword("");
+      }
+      if (formState === "Sign in") {
+        let result = await handleLogin(username, password);
+        setMessage(result);
+        setOpen(true);
+      }
+    } catch (e) {
+      let message = (e?.response?.data?.message || "Something went wrong");
+      setError(message);
+    }
+
+  }
+
   return (
-    <Card variant="outlined">
-      <Box sx={{ display: { xs: 'flex', md: 'none' } }}>
-        <SitemarkIcon />
-      </Box>
-      <Typography
-        component="h1"
-        variant="h4"
-        sx={{ width: '100%', fontSize: 'clamp(2rem, 10vw, 2.15rem)' }}
-      >
-        Sign in
-      </Typography>
-      <Box
-        component="form"
-        onSubmit={handleSubmit}
-        noValidate
-        sx={{ display: 'flex', flexDirection: 'column', width: '100%', gap: 2 }}
-      >
-        <FormControl>
-          <FormLabel htmlFor="email">Email</FormLabel>
+    <div className="auth-container">
+
+      {/* Left visual section */}
+      <div className="auth-visual" />
+
+
+      {/* Right authentication section */}
+      <div className="auth-form-section">
+
+        {/* Heading */}
+        <Avatar sx={{ bgcolor: "secondary.main", height: 50, width: 50, alignSelf: "center", mb: 2 }}>
+          <LockOutlinedIcon sx={{ height: 25, width: 25 }} />
+        </Avatar>
+
+        <div className="auth-toggle">
+          <Button variant={formState == "Sign up" ? "contained" : "outlined"}
+            onClick={() => setFormState("Sign up")}
+          >
+            Sign up
+          </Button>
+          <Button variant={formState == "Sign in" ? "contained" : "outlined"}
+            onClick={() => setFormState("Sign in")}
+          >
+            Sign in
+          </Button>
+        </div>
+
+
+        {/* Login form */}
+        <Box
+          component="form"
+          className="auth-form"
+          onSubmit={handleSubmit}
+          noValidate
+        >
+          {/* Full name input */}
+          {formState == "Sign up" && (
+            <TextField
+              className="auth-input"
+              label="Full Name"
+              error={fullnameError}
+              helperText={fullnameErrorMessage}
+              id="fullname"
+              name="fullname"
+              type="text"
+              placeholder="Enter Your full name here"
+              value={fullname}
+              onChange={(e) => setFullname(e.target.value)}
+              autoFocus
+              required
+              fullWidth
+              variant="outlined"
+            />
+          )}
+          {/*Username input */}
           <TextField
-            error={emailError}
-            helperText={emailErrorMessage}
-            id="email"
-            type="email"
-            name="email"
-            placeholder="your@email.com"
-            autoComplete="email"
+            className="auth-input"
+            label="Username"
+            error={usernameError}
+            helperText={usernameErrorMessage}
+            id="username"
+            name="username"
+            type="text"
+            placeholder="Enter Your Username here"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
             autoFocus
             required
             fullWidth
             variant="outlined"
-            color={emailError ? 'error' : 'primary'}
           />
-        </FormControl>
-        <FormControl>
-          <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-            <FormLabel htmlFor="password">Password</FormLabel>
-          </Box>
+
+          {/* Password input */}
           <TextField
+            className="auth-input"
+            label="Password"
             error={passwordError}
             helperText={passwordErrorMessage}
-            name="password"
-            placeholder="••••••"
-            type="password"
             id="password"
-            autoComplete="current-password"
-            autoFocus
+            name="password"
+            type="password"
+            placeholder="Enter Your Password here"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
             required
             fullWidth
             variant="outlined"
-            color={passwordError ? 'error' : 'primary'}
           />
-        </FormControl>
-        <Button type="submit" fullWidth variant="contained" onClick={validateInputs}>
-          Sign in
-        </Button>
-        <Typography sx={{ textAlign: 'center' }}>
-          Don&apos;t have an account?{' '}
-          <span>
+
+          <Typography sx={{ color: "red" }}>{error}</Typography>
+
+          {/* Sign in button */}
+          <Button
+            className="loginBtn"
+            type="submit"
+            fullWidth
+            variant="contained"
+          >
+            {formState == "Sign up" ? "Sign up" : "Sign in"}
+          </Button>
+
+
+          {/* Signup link */}
+          <Typography className="auth-signup-text">
+            Don't have an account?{" "}
             <Link
               href="/material-ui/getting-started/templates/sign-in/"
               variant="body2"
-              sx={{ alignSelf: 'center' }}
+              className="auth-signup-link"
             >
               Sign up
             </Link>
-          </span>
-        </Typography>
-      </Box>
-      <Divider>or</Divider>
-      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-        <Button
-          fullWidth
-          variant="outlined"
-          onClick={() => alert('Sign in with Google')}
-          startIcon={<GoogleIcon />}
-        >
-          Sign in with Google
-        </Button>
-        <Button
-          fullWidth
-          variant="outlined"
-          onClick={() => alert('Sign in with Facebook')}
-          startIcon={<FacebookIcon />}
-        >
-          Sign in with Facebook
-        </Button>
-      </Box>
-    </Card>
+          </Typography>
+
+        </Box>
+
+
+        {/* Divider */}
+        <Divider className="auth-divider">
+          or
+        </Divider>
+
+
+        {/* Social login buttons */}
+        <Box className="auth-social-buttons">
+
+          {/* Google login */}
+          <Button
+            className="otherBtn"
+            fullWidth
+            variant="outlined"
+            onClick={() => alert("Sign in with Google")}
+            startIcon={<GoogleIcon />}
+          >
+            Sign in with Google
+          </Button>
+
+
+          {/* Facebook login */}
+          <Button
+            className="otherBtn"
+            fullWidth
+            variant="outlined"
+            onClick={() => alert("Sign in with Facebook")}
+            startIcon={<FacebookIcon />}
+          >
+            Sign in with Facebook
+          </Button>
+
+        </Box>
+
+      </div>
+      <Snackbar
+        open={open}
+        autoHideDuration={4000}
+        onClose={() => setOpen(false)}
+        message={message}
+
+      />
+    </div>
   );
 }

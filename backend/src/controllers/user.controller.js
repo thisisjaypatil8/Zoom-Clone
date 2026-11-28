@@ -21,6 +21,8 @@ const login = async (req, res) => {
             await user.save();
             
             return res.status(httpStatus.OK).json({ message: "Login successful", token });
+        }else{
+            return res.status(httpStatus.UNAUTHORIZED).json({ message: "Invalid credentials" });
         }
 
         
@@ -31,7 +33,7 @@ const login = async (req, res) => {
 }
 
 const register = async (req, res) => {
-    const { name, username, password } = req.body;
+    const { fullname, username, password } = req.body;
 
 
     try {
@@ -43,7 +45,7 @@ const register = async (req, res) => {
         const hashedPassword = await bcrypt.hash(password, 10);
 
         const newUser = await User.create({
-            name,
+            name:fullname,
             username,
             password: hashedPassword
         });

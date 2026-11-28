@@ -56,10 +56,10 @@ export const connectToSocket = (server) => {
                 }
 
                 messages[matchingRoom].push({'sender':sender, "data": data, "socket-id-sender": socket.id})
-                console.log("message", key, ":", sender, data);
+                console.log("message", matchingRoom, ":", sender, data);
 
                 connections[matchingRoom].forEach((elem) => {
-                    io.on(elem).emit("chat-message", data, sender, socket.id);
+                    io.to(elem).emit("chat-message", data, sender, socket.id);
                 })
             }
 
@@ -93,6 +93,7 @@ export const connectToSocket = (server) => {
         })
 
 
-        return io;
+        
     })
+    return io;
 }
